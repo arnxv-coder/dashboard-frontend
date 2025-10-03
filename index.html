@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server Dashboard</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 2rem; }
+  .stat { margin-bottom: 1rem; font-size: 1.2rem; }
+</style>
+</head>
+<body>
+<h1>Server Dashboard</h1>
+<div class="stat" id="cpu">CPU: --</div>
+<div class="stat" id="ram">RAM: --</div>
+<div class="stat" id="uptime">Uptime: --</div>
+
+<script>
+async function fetchStatus() {
+  try {
+    const res = await fetch('https://dashboard-87s1.onrender.com/api/status');
+    const data = await res.json();
+    document.getElementById('cpu').textContent = "CPU: " + data.cpu;
+    document.getElementById('ram').textContent = "RAM: " + data.ram;
+    document.getElementById('uptime').textContent = "Uptime: " + data.uptime;
+  } catch(e) {
+    console.log("Error fetching API", e);
+  }
+}
+
+fetchStatus();
+setInterval(fetchStatus, 3000); // refresh every 3s
+</script>
+</body>
+</html>
