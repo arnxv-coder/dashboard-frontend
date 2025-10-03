@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -50,7 +50,7 @@
     .progress-bar{width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:50px; overflow:hidden; margin-top:1rem;}
     .progress-fill{height:100%; border-radius:50px; transition:width 1s ease, background 0.3s;}
     .progress-fill:after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent); animation:shimmer 2s infinite;}
-    @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+    @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);} }
 
     /* --- Charts --- */
     .chart-container{grid-column:span 2; background:var(--bg-card); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:12px; padding:1.5rem; transition:all 0.3s;}
@@ -207,68 +207,75 @@ document.querySelectorAll('.nav-item').forEach(item=>item.addEventListener('clic
 const networkCtx=document.getElementById('networkChart').getContext('2d');
 const httpCtx=document.getElementById('httpChart').getContext('2d');
 const chartOptions={responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#94a3b8'}}}, scales:{y:{grid:{color:'rgba(100,116,139,0.2)'},ticks:{color:'#94a3b8'}},x:{grid:{color:'rgba(100,116,139,0.2)'},ticks:{color:'#94a3b8'}}}};
-const networkChart=new Chart(networkCtx,{type:'line',data:{labels:[],datasets:[{label:'Upload (MB/s)',data:[],borderColor:'#00fff2',backgroundColor:'rgba(0,255,242,0.1)',tension:0.4},{label:'Download (MB/s)',data:[],borderColor:'#7b2ff7',backgroundColor:'rgba(123,47,247,0.1)',tension:0.4}]},options:{...chartOptions,height:300}});
-const httpChart=new Chart(httpCtx,{type:'bar',data:{labels:['200 OK','400 Bad Request','500 Server Error'],datasets:[{label:'Requests',data:[0,0,0],backgroundColor:['#00ff88','#ffaa00','#ff3366']}]},options:{...chartOptions,height:300}});
+const networkChart=new Chart(networkCtx,{type:'line',data:{labels:[],datasets:[{label:'Upload (MB/s)',data:[],borderColor:'#00fff2',backgroundColor:'rgba(0,255,242,0.1)',tension:0.4},{label:'Download (MB/s)',data:[],borderColor:'#7b2ff7',backgroundColor:'rgba(123,47,247,0.1)',tension:0.4}]},options:chartOptions});
+const httpChart=new Chart(httpCtx,{type:'line',data:{labels:[],datasets:[{label:'HTTP Requests',data:[],borderColor:'#ffaa00',backgroundColor:'rgba(255,170,0,0.1)',tension:0.4}]},options:chartOptions});
 
 // --- Fetch & Update ---
 async function fetchData(){
     try{
-        const statusRes=await fetch(`${API_URL}/api/status`); const status=await statusRes.json();
-        document.getElementById('cpuValue').textContent=status.cpuLoad.toFixed(1)+'%';
-        document.getElementById('cpuProgress').style.width=status.cpuLoad+'%';
-        document.getElementById('cpuModel').textContent=status.cpuModel;
-        document.getElementById('ramValue').textContent=status.ramUsed.toFixed(1)+' GB';
-        document.getElementById('ramSubtitle').textContent=`${status.ramUsed.toFixed(1)} GB / ${status.ramTotal} GB`;
-        document.getElementById('ramProgress').style.width=(status.ramUsed/status.ramTotal*100)+'%';
-        document.getElementById('diskValue').textContent=status.diskUsed.toFixed(1)+' GB';
-        document.getElementById('diskSubtitle').textContent=`${status.diskUsed.toFixed(1)} GB / ${status.diskTotal} GB`;
-        document.getElementById('diskProgress').style.width=(status.diskUsed/status.diskTotal*100)+'%';
+        const [statusRes, netRes, httpRes, connRes, logsRes]=await Promise.all([
+            fetch(`${API_URL}/api/status`),
+            fetch(`${API_URL}/api/network`),
+            fetch(`${API_URL}/api/http`),
+            fetch(`${API_URL}/api/connections`),
+            fetch(`${API_URL}/api/logs`)
+        ]);
+        if(!statusRes.ok) throw new Error('Status API failed');
+        if(!netRes.ok) throw new Error('Network API failed');
+        if(!httpRes.ok) throw new Error('HTTP API failed');
+        if(!connRes.ok) throw new Error('Connections API failed');
+        if(!logsRes.ok) throw new Error('Logs API failed');
+
+        const status=await statusRes.json();
+        const network=await netRes.json();
+        const http=await httpRes.json();
+        const connections=await connRes.json();
+        const logs=await logsRes.json();
+
+        // --- CPU/RAM/Disk ---
+        document.getElementById('cpuValue').textContent=`${status.cpu}%`;
+        document.getElementById('cpuProgress').style.width=`${status.cpu}%`;
+        document.getElementById('cpuModel').textContent=status.model;
+        document.getElementById('ramValue').textContent=`${status.ram.used} GB`;
+        document.getElementById('ramProgress').style.width=`${status.ram.percent}%`;
+        document.getElementById('ramSubtitle').textContent=`${status.ram.total} GB Total`;
+        document.getElementById('diskValue').textContent=`${status.disk.used} GB`;
+        document.getElementById('diskProgress').style.width=`${status.disk.percent}%`;
+        document.getElementById('diskSubtitle').textContent=`${status.disk.total} GB Total`;
         document.getElementById('uptimeValue').textContent=status.uptime;
 
-        // Network
-        const netRes=await fetch(`${API_URL}/api/network`); const net=await netRes.json();
-        const time = new Date().toLocaleTimeString();
-        if (networkChart.data.labels.length > 10) {
-        networkChart.data.labels.shift();
-        networkChart.data.datasets[0].data.shift();
-        networkChart.data.datasets[1].data.shift();
-        }
-        networkChart.data.labels.push(time);
+        // --- Connections ---
+        document.getElementById('connectionsValue').textContent=connections.active;
+
+        // --- Network Chart ---
+        if(networkChart.data.labels.length>10) networkChart.data.labels.shift();
+        if(networkChart.data.datasets[0].data.length>10) networkChart.data.datasets.forEach(ds=>ds.data.shift());
+        networkChart.data.labels.push(new Date().toLocaleTimeString());
         networkChart.data.datasets[0].data.push(network.upload);
         networkChart.data.datasets[1].data.push(network.download);
         networkChart.update();
 
-        // HTTP Requests
-        const httpRes=await fetch(`${API_URL}/api/http`); const http=await httpRes.json();
-        httpChart.data.datasets[0].data=[http.status200,http.status400,http.status500]; httpChart.update();
+        // --- HTTP Chart ---
+        if(httpChart.data.labels.length>10) httpChart.data.labels.shift();
+        if(httpChart.data.datasets[0].data.length>10) httpChart.data.datasets[0].data.shift();
+        httpChart.data.labels.push(new Date().toLocaleTimeString());
+        httpChart.data.datasets[0].data.push(http.requests);
+        httpChart.update();
 
-        // Connections & Processes
-        const connRes=await fetch(`${API_URL}/api/connections`); const conn=await connRes.json();
-        document.getElementById('connectionsValue').textContent=conn.active;
-        const processesTable=document.getElementById('processesTable');
-        processesTable.innerHTML=conn.processes.map(p=>`<tr>
-            <td>${p.name}</td><td>${p.pid}</td><td>${p.cpu.toFixed(1)}%</td><td>${p.mem.toFixed(1)}%</td>
-            <td><span class="status-indicator ${p.status==='running'?'status-success':'status-warning'}"></span>${p.status}</td>
-        </tr>`).join('');
+        // --- Logs ---
+        const maxLogs=50;
+        const recentLogs=logs.slice(-maxLogs);
+        document.getElementById('logsContainer').innerHTML=recentLogs.map(log=>`<div class="log-entry">${log}</div>`).join('');
 
-        // Logs
-        const logsRes=await fetch(`${API_URL}/api/logs`); const logs=await logsRes.json();
-        const maxLogs = 50;
-        const recentLogs = logs.slice(-maxLogs); // take last 50
-        logsContainer.innerHTML = recentLogs.map(log => `<div class="log-entry">${log}</div>`).join('');
-        logsContainer.scrollTop = logsContainer.scrollHeight; // auto-scroll to latest
-
-    }catch(err){console.error('Fetch error:',err);}
+    }catch(err){
+        console.error(err);
+    }
 }
 
-// --- Log Search ---
-document.getElementById('logSearch').addEventListener('input',e=>{
-    const search=e.target.value.toLowerCase();
-    document.querySelectorAll('.log-entry').forEach(entry=>{entry.style.display=entry.textContent.toLowerCase().includes(search)?'block':'none';});
-});
-
-// --- Initialize ---
-createParticles(); fetchData(); setInterval(fetchData,3000);
+// --- Start ---
+createParticles();
+fetchData();
+setInterval(fetchData,3000);
 </script>
 </body>
 </html>
