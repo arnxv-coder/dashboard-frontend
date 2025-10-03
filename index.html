@@ -1,35 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Server Dashboard</title>
-<style>
-  body { font-family: Arial, sans-serif; padding: 2rem; }
-  .stat { margin-bottom: 1rem; font-size: 1.2rem; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<h1>Server Dashboard</h1>
-<div class="stat" id="cpu">CPU: --</div>
-<div class="stat" id="ram">RAM: --</div>
-<div class="stat" id="uptime">Uptime: --</div>
+  <div class="dashboard">
+    <header class="header">
+      <h1>Welcome, Arnav</h1>
+      <p>Server Metrics Dashboard</p>
+    </header>
+    <section class="stats">
+      <div class="stat-card">
+        <h3>CPU Usage</h3>
+        <p id="cpu">Loading...</p>
+      </div>
+      <div class="stat-card">
+        <h3>RAM Usage</h3>
+        <p id="ram">Loading...</p>
+      </div>
+      <div class="stat-card">
+        <h3>Uptime</h3>
+        <p id="uptime">Loading...</p>
+      </div>
+    </section>
+  </div>
+  <script>
+    async function fetchStatus() {
+      try {
+        const res = await fetch('https://yourapp.onrender.com/api/status');
+        const data = await res.json();
+        document.getElementById('cpu').textContent = data.cpu;
+        document.getElementById('ram').textContent = data.ram;
+        document.getElementById('uptime').textContent = data.uptime;
+      } catch (e) {
+        console.error("Error fetching API", e);
+      }
+    }
 
-<script>
-async function fetchStatus() {
-  try {
-    const res = await fetch('https://dashboard-87s1.onrender.com/api/status');
-    const data = await res.json();
-    document.getElementById('cpu').textContent = "CPU: " + data.cpu;
-    document.getElementById('ram').textContent = "RAM: " + data.ram;
-    document.getElementById('uptime').textContent = "Uptime: " + data.uptime;
-  } catch(e) {
-    console.log("Error fetching API", e);
-  }
-}
-
-fetchStatus();
-setInterval(fetchStatus, 3000); // refresh every 3s
-</script>
+    fetchStatus();
+    setInterval(fetchStatus, 3000);
+  </script>
 </body>
 </html>
