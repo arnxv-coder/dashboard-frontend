@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -227,9 +227,15 @@ async function fetchData(){
 
         // Network
         const netRes=await fetch(`${API_URL}/api/network`); const net=await netRes.json();
-        const time=new Date().toLocaleTimeString();
-        if(networkChart.data.labels.length>10){networkChart.data.labels.shift(); networkChart.data.datasets[0].data.shift(); networkChart.data.datasets[1].data.shift();}
-        networkChart.data.labels.push(time); networkChart.data.datasets[0].data.push(net.upload); networkChart.data.datasets[1].data.push(net.download);
+        const time = new Date().toLocaleTimeString();
+        if (networkChart.data.labels.length > 10) {
+        networkChart.data.labels.shift();
+        networkChart.data.datasets[0].data.shift();
+        networkChart.data.datasets[1].data.shift();
+        }
+        networkChart.data.labels.push(time);
+        networkChart.data.datasets[0].data.push(network.upload);
+        networkChart.data.datasets[1].data.push(network.download);
         networkChart.update();
 
         // HTTP Requests
@@ -247,8 +253,11 @@ async function fetchData(){
 
         // Logs
         const logsRes=await fetch(`${API_URL}/api/logs`); const logs=await logsRes.json();
-        const logsContainer=document.getElementById('logsContainer');
-        logsContainer.innerHTML=logs.map(log=>`<div class="log-entry">${log}</div>`).join('');
+        const maxLogs = 50;
+        const recentLogs = logs.slice(-maxLogs); // take last 50
+        logsContainer.innerHTML = recentLogs.map(log => `<div class="log-entry">${log}</div>`).join('');
+        logsContainer.scrollTop = logsContainer.scrollHeight; // auto-scroll to latest
+
     }catch(err){console.error('Fetch error:',err);}
 }
 
