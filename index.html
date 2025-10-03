@@ -1,48 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Server Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arnav's Server Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0; background: #1E2A38; color: #fff;
+  }
+  .sidebar {
+    width: 220px; background: #16222A; height: 100vh;
+    position: fixed; left: 0; top: 0; padding: 1rem;
+  }
+  .sidebar h2 { color: #4A90E2; margin-bottom: 2rem; }
+  .sidebar a { display: block; color: #ccc; margin: 0.5rem 0; text-decoration: none; }
+  .main { margin-left: 240px; padding: 2rem; }
+  .header { display: flex; justify-content: space-between; align-items: center; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+  .card { background: #233046; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+  .card h3 { margin-bottom: 0.5rem; color: #4A90E2; }
+  canvas { background: #1E2A38; border-radius: 8px; }
+  .footer { text-align: center; margin-top: 2rem; color: #aaa; font-size: 0.9rem; }
+  button { background: #4A90E2; border: none; padding: 0.5rem 1rem; border-radius: 5px; color: #fff; cursor: pointer; }
+</style>
 </head>
 <body>
-  <div class="dashboard">
-    <header class="header">
-      <h1>Welcome, Arnav</h1>
-      <p>Server Metrics Dashboard</p>
-    </header>
-    <section class="stats">
-      <div class="stat-card">
-        <h3>CPU Usage</h3>
-        <p id="cpu">Loading...</p>
-      </div>
-      <div class="stat-card">
-        <h3>RAM Usage</h3>
-        <p id="ram">Loading...</p>
-      </div>
-      <div class="stat-card">
-        <h3>Uptime</h3>
-        <p id="uptime">Loading...</p>
-      </div>
-    </section>
-  </div>
-  <script>
-    async function fetchStatus() {
-      try {
-        const res = await fetch('https://dashboard-87s1.onrender.com/api/status');
-        const data = await res.json();
-        document.getElementById('cpu').textContent = data.cpu;
-        document.getElementById('ram').textContent = data.ram;
-        document.getElementById('uptime').textContent = data.uptime;
-      } catch (e) {
-        console.error("Error fetching API", e);
-      }
-    }
 
-    fetchStatus();
-    setInterval(fetchStatus, 3000);
-  </script>
+<div class="sidebar">
+  <h2>Arnxv</h2>
+  <a href="#">Overview</a>
+  <a href="#">Metrics</a>
+  <a href="#">Processes</a>
+  <a href="#">Network</a>
+  <a href="#">Settings</a>
+</div>
+
+<div class="main">
+  <div class="header">
+    <h1>Server Dashboard</h1>
+    <button onclick="toggleTheme()">Toggle Theme</button>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>CPU Usage</h3>
+      <p id="cpu">--%</p>
+    </div>
+    <div class="card">
+      <h3>RAM Usage</h3>
+      <p id="ram">--%</p>
+    </div>
+    <div class="card">
+      <h3>Disk Usage</h3>
+      <p id="disk">--%</p>
+    </div>
+    <div class="card">
+      <h3>Uptime</h3>
+      <p id="uptime">-- hours</p>
+    </div>
+  </div>
+
+  <h2>CPU/RAM Over Time</h2>
+  <canvas id="lineChart" height="100"></canvas>
+
+  <h2>Top Processes</h2>
+  <table id="processTable" border="1" cellpadding="5" style="width:100%; background:#233046; color:#fff; border-radius:5px;">
+    <thead><tr><th>Name</th><th>CPU%</th><th>RAM%</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="footer">© 2025 Arnav | Mega Dashboard</div>
+</div>
+
+<script>
+let lineChart;
+let cpuData = [], ramData = [], labels = [];
+
+async function fetchData() {
+  const status = await fetch('https://YOUR-RENDER-APP.onrender.com/api/status').then(r => r.json());
+  const processes = await fetch('https://YOUR-RENDER-APP.onrender.com/api/processes').then(r => r.json());
+
+  document.getElementById('cpu').textContent = status.cpu + '%';
+  document.getElementById('ram').textContent = status.ram + '%';
+  document.getElementById('disk').textContent = status.disk[0].used + '%';
+  document.getElementById('uptime').textContent = status.uptime + ' hours';
+
+  // update process table
+  const tbody = document.getElementById('processTable').querySelector('tbody');
+  tbody.innerHTML = '';
+  processes.forEach(p => {
+    const row = `<tr><td>${p.name}</td><td>${p.cpu}</td><td>${p.mem}</td></tr>`;
+    tbody.innerHTML += row;
+  });
+
+  // update charts
+  if (cpuData.length > 10) { cpuData.shift(); ramData.shift(); labels.shift(); }
+  cpuData.push(parseFloat(status.cpu)); ramData.push(parseFloat(status.ram)); labels.push(new Date().toLocaleTimeString());
+
+  if (!lineChart) {
+    const ctx = document.getElementById('lineChart').getContext('2d');
+    lineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'CPU %', data: cpuData, borderColor: '#4A90E2', fill: false },
+          { label: 'RAM %', data: ramData, borderColor: '#2ECC71', fill: false }
+        ]
+      },
+      options: { responsive: true, animation: { duration: 500 } }
+    });
+  } else {
+    lineChart.update();
+  }
+}
+
+setInterval(fetchData, 3000);
+fetchData();
+
+function toggleTheme() {
+  document.body.style.background = document.body.style.background === '#1E2A38' ? '#f4f7fc' : '#1E2A38';
+  document.body.style.color = document.body.style.color === '#fff' ? '#333' : '#fff';
+}
+</script>
 </body>
 </html>
