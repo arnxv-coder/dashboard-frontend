@@ -31,7 +31,7 @@
   <script>
     async function fetchStatus() {
       try {
-        const res = await fetch('https://yourapp.onrender.com/api/status');
+        const res = await fetch('https://dashboard-87s1.onrender.com/api/status');
         const data = await res.json();
         document.getElementById('cpu').textContent = data.cpu;
         document.getElementById('ram').textContent = data.ram;
