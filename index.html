@@ -80,8 +80,8 @@ let lineChart;
 let cpuData = [], ramData = [], labels = [];
 
 async function fetchData() {
-  const status = await fetch('https://YOUR-RENDER-APP.onrender.com/api/status').then(r => r.json());
-  const processes = await fetch('https://YOUR-RENDER-APP.onrender.com/api/processes').then(r => r.json());
+  const status = await fetch('https://dashboard-87s1.onrender.com/api/status').then(r => r.json());
+  const processes = await fetch('https://dashboard-87s1.onrender.com/api/processes').then(r => r.json());
 
   document.getElementById('cpu').textContent = status.cpu + '%';
   document.getElementById('ram').textContent = status.ram + '%';
