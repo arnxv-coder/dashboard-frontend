@@ -1,831 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arnav's Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arnav's Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* --- Basic Resets --- */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:#0a0e1a; color:#fff; overflow-x:hidden; }
+    :root{
+        --primary:#00fff2; --secondary:#7b2ff7; --bg-card:rgba(15,23,42,0.6);
+        --text-secondary:#94a3b8; --border:rgba(100,116,139,0.2);
+        --success:#00ff88; --warning:#ffaa00; --danger:#ff3366;
+    }
 
-        :root {
-            --primary: #00fff2;
-            --secondary: #7b2ff7;
-            --bg-dark: #0a0e1a;
-            --bg-card: rgba(15, 23, 42, 0.6);
-            --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --border: rgba(100, 116, 139, 0.2);
-            --success: #00ff88;
-            --warning: #ffaa00;
-            --danger: #ff3366;
-        }
+    /* --- Particles --- */
+    #particles{position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;}
+    .particle{position:absolute; width:2px; height:2px; background:var(--primary); border-radius:50%; opacity:0.3; animation:float 20s infinite;}
+    @keyframes float {0%,100%{transform:translate(0,0);}25%{transform:translate(100px,-100px);}50%{transform:translate(-50px,-200px);}75%{transform:translate(-100px,-100px);}}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            overflow-x: hidden;
-        }
+    /* --- Layout --- */
+    .container{display:flex; min-height:100vh; position:relative; z-index:1;}
+    .sidebar{width:280px; background:var(--bg-card); backdrop-filter:blur(20px); border-right:1px solid var(--border); padding:2rem 1rem; transition: transform 0.3s ease;}
+    .logo{font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700;color:var(--primary);margin-bottom:3rem;text-align:center;cursor:pointer;transition:transform 0.3s;}
+    .logo:hover{transform:scale(1.05);}
+    .logo.animate{animation:logoSpin 1s ease-in-out;}
+    @keyframes logoSpin{0%{transform:rotate(0deg) scale(1);}50%{transform:rotate(180deg) scale(1.2);}100%{transform:rotate(360deg) scale(1);}}
+    .nav-item{padding:1rem 1.5rem;margin:0.5rem 0;border-radius:8px;cursor:pointer;transition:all 0.3s;color:var(--text-secondary);font-weight:500;position:relative;overflow:hidden;}
+    .nav-item:before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:var(--primary);transform:scaleY(0);transition:transform 0.3s;}
+    .nav-item:hover, .nav-item.active{background:rgba(0,255,242,0.1); color:var(--primary); transform:translateX(5px);}
+    .nav-item:hover:before, .nav-item.active:before{transform:scaleY(1);}
+    .main-content{flex:1; padding:2rem; overflow-y:auto;}
+    .header{display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;}
+    .header h1{font-family:'Rajdhani',sans-serif;font-size:2.5rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .user-info{display:flex;align-items:center;gap:1rem;background:var(--bg-card);backdrop-filter:blur(20px);padding:0.8rem 1.5rem;border-radius:50px;border:1px solid var(--border);}
+    .user-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:700;}
 
-        #particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
+    /* --- Metrics Grid & Cards --- */
+    .metrics-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; margin-bottom:2rem;}
+    .card{background:var(--bg-card); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:12px; padding:1.5rem; position:relative; overflow:hidden; transition:all 0.3s;}
+    .card:before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,242,0.1),transparent);transition:left 0.5s;}
+    .card:hover:before{left:100%;}
+    .card:hover{transform:translateY(-5px) rotateX(2deg);border-color:var(--primary); box-shadow:0 10px 40px rgba(0,255,242,0.2);}
+    .card-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;}
+    .card-title{font-size:0.9rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;}
+    .card-value{font-family:'Rajdhani',sans-serif;font-size:2.5rem;font-weight:700;color:#fff;margin:0.5rem 0;}
+    .card-subtitle{font-size:0.85rem;color:var(--text-secondary);}
+    .progress-bar{width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:50px; overflow:hidden; margin-top:1rem;}
+    .progress-fill{height:100%; border-radius:50px; transition:width 1s ease, background 0.3s;}
+    .progress-fill:after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent); animation:shimmer 2s infinite;}
+    @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
 
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: var(--primary);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: float 20s infinite;
-        }
+    /* --- Charts --- */
+    .chart-container{grid-column:span 2; background:var(--bg-card); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:12px; padding:1.5rem; transition:all 0.3s;}
+    .chart-container:hover{border-color:var(--primary); box-shadow:0 10px 40px rgba(0,255,242,0.1);}
+    canvas{max-width:100%;}
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(100px, -100px); }
-            50% { transform: translate(-50px, -200px); }
-            75% { transform: translate(-100px, -100px); }
-        }
+    /* --- Table & Logs --- */
+    .table-container{background:var(--bg-card); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:2rem;}
+    table{width:100%; border-collapse:collapse;}
+    th{padding:1rem;text-align:left;color:var(--text-secondary);font-weight:600;text-transform:uppercase;font-size:0.85rem;letter-spacing:1px;border-bottom:1px solid var(--border);}
+    td{padding:1rem;border-bottom:1px solid var(--border);transition:background 0.3s;}
+    tr:hover td{background:rgba(0,255,242,0.05);}
+    .logs-panel{background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:12px;padding:1.5rem;max-height:400px;overflow-y:auto;}
+    .logs-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+    .search-input{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:0.5rem 1rem;color:#fff;outline:none;transition:all 0.3s;}
+    .search-input:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(0,255,242,0.1);}
+    .log-entry{padding:0.8rem;margin:0.5rem 0;background:rgba(255,255,255,0.03);border-left:3px solid var(--primary);border-radius:4px;font-family:'Courier New',monospace;font-size:0.85rem;transition:all 0.3s;}
+    .log-entry:hover{background:rgba(0,255,242,0.05); transform:translateX(5px);}
 
-        .container {
-            display: flex;
-            min-height: 100vh;
-            position: relative;
-            z-index: 1;
-        }
+    /* --- Status --- */
+    .status-indicator{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:0.5rem;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+    .status-success{background:var(--success);}
+    .status-warning{background:var(--warning);}
+    .status-danger{background:var(--danger);}
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--border);
-            padding: 2rem 1rem;
-            transition: transform 0.3s ease;
-        }
-
-        .logo {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 3rem;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .logo.animate {
-            animation: logoSpin 1s ease-in-out;
-        }
-
-        @keyframes logoSpin {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.2); }
-            100% { transform: rotate(360deg) scale(1); }
-        }
-
-        .nav-item {
-            padding: 1rem 1.5rem;
-            margin: 0.5rem 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            color: var(--text-secondary);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-item:before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--primary);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: rgba(0, 255, 242, 0.1);
-            color: var(--primary);
-            transform: translateX(5px);
-        }
-
-        .nav-item:hover:before, .nav-item.active:before {
-            transform: scaleY(1);
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            border: 1px solid var(--border);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
-
-        /* Grid Layout */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .card:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 242, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .card:hover:before {
-            left: 100%;
-        }
-
-        .card:hover {
-            transform: translateY(-5px) rotateX(2deg);
-            border-color: var(--primary);
-            box-shadow: 0 10px 40px rgba(0, 255, 242, 0.2);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .card-value {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0.5rem 0;
-        }
-
-        .card-subtitle {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        /* Progress Bar */
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            overflow: hidden;
-            margin-top: 1rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 50px;
-            transition: width 1s ease, background 0.3s ease;
-            position: relative;
-        }
-
-        .progress-fill:after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        /* Charts */
-        .chart-container {
-            grid-column: span 2;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .chart-container:hover {
-            border-color: var(--primary);
-            box-shadow: 0 10px 40px rgba(0, 255, 242, 0.1);
-        }
-
-        canvas {
-            max-width: 100%;
-        }
-
-        /* Processes Table */
-        .table-container {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 1rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.3s ease;
-        }
-
-        tr:hover td {
-            background: rgba(0, 255, 242, 0.05);
-        }
-
-        /* Logs Panel */
-        .logs-panel {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .logs-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .search-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            color: var(--text-primary);
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 255, 242, 0.1);
-        }
-
-        .log-entry {
-            padding: 0.8rem;
-            margin: 0.5rem 0;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 3px solid var(--primary);
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .log-entry:hover {
-            background: rgba(0, 255, 242, 0.05);
-            transform: translateX(5px);
-        }
-
-        /* Status Indicators */
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 0.5rem;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .status-success { background: var(--success); }
-        .status-warning { background: var(--warning); }
-        .status-danger { background: var(--danger); }
-
-        /* Mobile Menu Toggle */
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1000;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.8rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .menu-toggle:hover {
-            background: rgba(0, 255, 242, 0.1);
-            border-color: var(--primary);
-        }
-
-        .menu-toggle span {
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: var(--text-primary);
-            margin: 5px 0;
-            transition: all 0.3s ease;
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                height: 100vh;
-                z-index: 999;
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .menu-toggle {
-                display: block;
-            }
-
-            .main-content {
-                padding: 5rem 1rem 1rem;
-            }
-
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-container {
-                grid-column: span 1;
-            }
-
-            .header h1 {
-                font-size: 1.8rem;
-            }
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0, 255, 242, 0.3);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+    /* --- Mobile --- */
+    .menu-toggle{display:none;position:fixed;top:1rem;left:1rem; z-index:1000;background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:8px;padding:0.8rem;cursor:pointer;transition:all 0.3s;}
+    .menu-toggle span{display:block;width:24px;height:2px;background:#fff;margin:5px 0;transition:all 0.3s;}
+    @media(max-width:968px){.sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);} .sidebar.active{transform:translateX(0);} .menu-toggle{display:block;} .main-content{padding:5rem 1rem 1rem;} .metrics-grid{grid-template-columns:1fr;} .chart-container{grid-column:span 1;} .header h1{font-size:1.8rem;}}
+</style>
 </head>
 <body>
-    <div id="particles"></div>
-    
-    <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="logo" id="logo">ARNAV'S DASHBOARD</div>
-            <nav>
-                <div class="nav-item active" data-section="overview">Overview</div>
-                <div class="nav-item" data-section="metrics">Metrics</div>
-                <div class="nav-item" data-section="processes">Processes</div>
-                <div class="nav-item" data-section="network">Network</div>
-                <div class="nav-item" data-section="logs">Logs</div>
-                <div class="nav-item" data-section="settings">Settings</div>
-            </nav>
-        </aside>
+<div id="particles"></div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="menu-toggle" id="menuToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+<div class="container">
+    <aside class="sidebar" id="sidebar">
+        <div class="logo" id="logo">ARNAV'S DASHBOARD</div>
+        <nav>
+            <div class="nav-item active" data-section="overview">Overview</div>
+            <div class="nav-item" data-section="metrics">Metrics</div>
+            <div class="nav-item" data-section="processes">Processes</div>
+            <div class="nav-item" data-section="network">Network</div>
+            <div class="nav-item" data-section="logs">Logs</div>
+            <div class="nav-item" data-section="settings">Settings</div>
+        </nav>
+    </aside>
 
-            <!-- Header -->
-            <header class="header">
-                <h1>System Overview</h1>
-                <div class="user-info">
-                    <div class="user-avatar">A</div>
-                    <div>
-                        <div style="font-weight: 600;">Arnav</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Administrator</div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Metrics Grid -->
-            <div class="metrics-grid">
-                <!-- CPU Usage -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">CPU Usage</span>
-                        <span class="status-indicator status-success"></span>
-                    </div>
-                    <div class="card-value" id="cpuValue">0%</div>
-                    <div class="card-subtitle">4 Cores @ 2.8 GHz</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="cpuProgress" style="width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary));"></div>
-                    </div>
-                </div>
-
-                <!-- RAM Usage -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">RAM Usage</span>
-                        <span class="status-indicator status-success"></span>
-                    </div>
-                    <div class="card-value" id="ramValue">0%</div>
-                    <div class="card-subtitle" id="ramSubtitle">0 GB / 16 GB</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="ramProgress" style="width: 0%; background: linear-gradient(90deg, #7b2ff7, #ff3366);"></div>
-                    </div>
-                </div>
-
-                <!-- Disk Usage -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">Disk Usage</span>
-                        <span class="status-indicator status-warning"></span>
-                    </div>
-                    <div class="card-value" id="diskValue">0%</div>
-                    <div class="card-subtitle" id="diskSubtitle">0 GB / 512 GB</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="diskProgress" style="width: 0%; background: linear-gradient(90deg, #ffaa00, #ff3366);"></div>
-                    </div>
-                </div>
-
-                <!-- Uptime -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">System Uptime</span>
-                        <span class="status-indicator status-success"></span>
-                    </div>
-                    <div class="card-value" id="uptimeValue">0d 0h</div>
-                    <div class="card-subtitle">Running smoothly</div>
-                </div>
-
-                <!-- Active Connections -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">Active Connections</span>
-                        <span class="status-indicator status-success"></span>
-                    </div>
-                    <div class="card-value" id="connectionsValue">0</div>
-                    <div class="card-subtitle">Concurrent users</div>
-                </div>
-
-                <!-- Network Chart -->
-                <div class="chart-container">
-                    <h3 style="margin-bottom: 1rem; font-family: 'Rajdhani', sans-serif;">Network Activity</h3>
-                    <canvas id="networkChart"></canvas>
-                </div>
-
-                <!-- HTTP Requests Chart -->
-                <div class="chart-container">
-                    <h3 style="margin-bottom: 1rem; font-family: 'Rajdhani', sans-serif;">HTTP Requests</h3>
-                    <canvas id="httpChart"></canvas>
+    <main class="main-content">
+        <div class="menu-toggle" id="menuToggle"><span></span><span></span><span></span></div>
+        <header class="header">
+            <h1>System Overview</h1>
+            <div class="user-info">
+                <div class="user-avatar">A</div>
+                <div>
+                    <div style="font-weight:600;">Arnav</div>
+                    <div style="font-size:0.85rem;color:#94a3b8;">Administrator</div>
                 </div>
             </div>
+        </header>
 
-            <!-- Processes Table -->
-            <div class="table-container">
-                <h3 style="margin-bottom: 1rem; font-family: 'Rajdhani', sans-serif;">Top Processes</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Process Name</th>
-                            <th>PID</th>
-                            <th>CPU %</th>
-                            <th>RAM %</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="processesTable">
-                        <tr>
-                            <td colspan="5" style="text-align: center;">
-                                <div class="loading"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="metrics-grid">
+            <!-- CPU -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">CPU Usage</span><span class="status-indicator status-success"></span></div>
+                <div class="card-value" id="cpuValue">0%</div>
+                <div class="card-subtitle" id="cpuModel"></div>
+                <div class="progress-bar"><div class="progress-fill" id="cpuProgress" style="width:0%;background:linear-gradient(90deg,var(--primary),var(--secondary));"></div></div>
+            </div>
+            <!-- RAM -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">RAM Usage</span><span class="status-indicator status-success"></span></div>
+                <div class="card-value" id="ramValue">0 GB</div>
+                <div class="card-subtitle" id="ramSubtitle"></div>
+                <div class="progress-bar"><div class="progress-fill" id="ramProgress" style="width:0%;background:linear-gradient(90deg,#7b2ff7,#ff3366);"></div></div>
+            </div>
+            <!-- Disk -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">Disk Usage</span><span class="status-indicator status-warning"></span></div>
+                <div class="card-value" id="diskValue">0 GB</div>
+                <div class="card-subtitle" id="diskSubtitle"></div>
+                <div class="progress-bar"><div class="progress-fill" id="diskProgress" style="width:0%;background:linear-gradient(90deg,#ffaa00,#ff3366);"></div></div>
+            </div>
+            <!-- Uptime -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">System Uptime</span><span class="status-indicator status-success"></span></div>
+                <div class="card-value" id="uptimeValue">0d 0h</div>
+                <div class="card-subtitle">Running smoothly</div>
+            </div>
+            <!-- Active Connections -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">Active Connections</span><span class="status-indicator status-success"></span></div>
+                <div class="card-value" id="connectionsValue">0</div>
+                <div class="card-subtitle">Concurrent users</div>
             </div>
 
-            <!-- Logs Panel -->
-            <div class="logs-panel">
-                <div class="logs-header">
-                    <h3 style="font-family: 'Rajdhani', sans-serif;">System Logs</h3>
-                    <input type="text" class="search-input" placeholder="Search logs..." id="logSearch">
-                </div>
-                <div id="logsContainer">
-                    <div class="loading"></div>
-                </div>
+            <!-- Charts -->
+            <div class="chart-container">
+                <h3 style="margin-bottom:1rem;font-family:'Rajdhani',sans-serif;">Network Activity</h3>
+                <canvas id="networkChart"></canvas>
             </div>
-        </main>
-    </div>
+            <div class="chart-container">
+                <h3 style="margin-bottom:1rem;font-family:'Rajdhani',sans-serif;">HTTP Requests</h3>
+                <canvas id="httpChart"></canvas>
+            </div>
+        </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script>
-        const API_URL = 'https://dashboard-87s1.onrender.com';
+        <!-- Processes Table -->
+        <div class="table-container">
+            <h3 style="margin-bottom:1rem;font-family:'Rajdhani',sans-serif;">Top Processes</h3>
+            <table>
+                <thead><tr><th>Process Name</th><th>PID</th><th>CPU %</th><th>RAM %</th><th>Status</th></tr></thead>
+                <tbody id="processesTable"><tr><td colspan="5" style="text-align:center;"><div class="loading"></div></td></tr></tbody>
+            </table>
+        </div>
 
-        // Particles Background
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-                container.appendChild(particle);
-            }
-        }
+        <!-- Logs -->
+        <div class="logs-panel">
+            <div class="logs-header">
+                <h3 style="font-family:'Rajdhani',sans-serif;">System Logs</h3>
+                <input type="text" class="search-input" placeholder="Search logs..." id="logSearch">
+            </div>
+            <div id="logsContainer"><div class="loading"></div></div>
+        </div>
+    </main>
+</div>
 
-        // Menu Toggle
-        document.getElementById('menuToggle').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+const API_URL = 'https://dashboard-87s1.onrender.com';
 
-        // Logo Easter Egg
-        document.getElementById('logo').addEventListener('click', function() {
-            this.classList.add('animate');
-            setTimeout(() => this.classList.remove('animate'), 1000);
-        });
+// --- Particles ---
+function createParticles(){
+    const container = document.getElementById('particles');
+    for(let i=0;i<50;i++){
+        const p=document.createElement('div');
+        p.className='particle';
+        p.style.left=Math.random()*100+'%';
+        p.style.top=Math.random()*100+'%';
+        p.style.animationDelay=Math.random()*20+'s';
+        p.style.animationDuration=(Math.random()*10+15)+'s';
+        container.appendChild(p);
+    }
+}
 
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+// --- Menu & Logo ---
+document.getElementById('menuToggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('active'));
+document.getElementById('logo').addEventListener('click',function(){this.classList.add('animate');setTimeout(()=>this.classList.remove('animate'),1000);});
+document.querySelectorAll('.nav-item').forEach(item=>item.addEventListener('click',function(){
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active')); this.classList.add('active');
+}));
 
-        // Chart Setup
-        const networkCtx = document.getElementById('networkChart').getContext('2d');
-        const httpCtx = document.getElementById('httpChart').getContext('2d');
+// --- Charts ---
+const networkCtx=document.getElementById('networkChart').getContext('2d');
+const httpCtx=document.getElementById('httpChart').getContext('2d');
+const chartOptions={responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#94a3b8'}}}, scales:{y:{grid:{color:'rgba(100,116,139,0.2)'},ticks:{color:'#94a3b8'}},x:{grid:{color:'rgba(100,116,139,0.2)'},ticks:{color:'#94a3b8'}}}};
+const networkChart=new Chart(networkCtx,{type:'line',data:{labels:[],datasets:[{label:'Upload (MB/s)',data:[],borderColor:'#00fff2',backgroundColor:'rgba(0,255,242,0.1)',tension:0.4},{label:'Download (MB/s)',data:[],borderColor:'#7b2ff7',backgroundColor:'rgba(123,47,247,0.1)',tension:0.4}]},options:{...chartOptions,height:300}});
+const httpChart=new Chart(httpCtx,{type:'bar',data:{labels:['200 OK','400 Bad Request','500 Server Error'],datasets:[{label:'Requests',data:[0,0,0],backgroundColor:['#00ff88','#ffaa00','#ff3366']}]},options:{...chartOptions,height:300}});
 
-        const chartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: { color: '#94a3b8' }
-                }
-            },
-            scales: {
-                y: {
-                    grid: { color: 'rgba(100, 116, 139, 0.2)' },
-                    ticks: { color: '#94a3b8' }
-                },
-                x: {
-                    grid: { color: 'rgba(100, 116, 139, 0.2)' },
-                    ticks: { color: '#94a3b8' }
-                }
-            }
-        };
+// --- Fetch & Update ---
+async function fetchData(){
+    try{
+        const statusRes=await fetch(`${API_URL}/api/status`); const status=await statusRes.json();
+        document.getElementById('cpuValue').textContent=status.cpuLoad.toFixed(1)+'%';
+        document.getElementById('cpuProgress').style.width=status.cpuLoad+'%';
+        document.getElementById('cpuModel').textContent=status.cpuModel;
+        document.getElementById('ramValue').textContent=status.ramUsed.toFixed(1)+' GB';
+        document.getElementById('ramSubtitle').textContent=`${status.ramUsed.toFixed(1)} GB / ${status.ramTotal} GB`;
+        document.getElementById('ramProgress').style.width=(status.ramUsed/status.ramTotal*100)+'%';
+        document.getElementById('diskValue').textContent=status.diskUsed.toFixed(1)+' GB';
+        document.getElementById('diskSubtitle').textContent=`${status.diskUsed.toFixed(1)} GB / ${status.diskTotal} GB`;
+        document.getElementById('diskProgress').style.width=(status.diskUsed/status.diskTotal*100)+'%';
+        document.getElementById('uptimeValue').textContent=status.uptime;
 
-        const networkChart = new Chart(networkCtx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Upload (MB/s)',
-                    data: [],
-                    borderColor: '#00fff2',
-                    backgroundColor: 'rgba(0, 255, 242, 0.1)',
-                    tension: 0.4
-                }, {
-                    label: 'Download (MB/s)',
-                    data: [],
-                    borderColor: '#7b2ff7',
-                    backgroundColor: 'rgba(123, 47, 247, 0.1)',
-                    tension: 0.4
-                }]
-            },
-            options: { ...chartOptions, height: 300 }
-        });
+        // Network
+        const netRes=await fetch(`${API_URL}/api/network`); const net=await netRes.json();
+        const time=new Date().toLocaleTimeString();
+        if(networkChart.data.labels.length>10){networkChart.data.labels.shift(); networkChart.data.datasets[0].data.shift(); networkChart.data.datasets[1].data.shift();}
+        networkChart.data.labels.push(time); networkChart.data.datasets[0].data.push(net.upload); networkChart.data.datasets[1].data.push(net.download);
+        networkChart.update();
 
-        const httpChart = new Chart(httpCtx, {
-            type: 'bar',
-            data: {
-                labels: ['200 OK', '400 Bad Request', '500 Server Error'],
-                datasets: [{
-                    label: 'Requests',
-                    data: [0, 0, 0],
-                    backgroundColor: ['#00ff88', '#ffaa00', '#ff3366']
-                }]
-            },
-            options: { ...chartOptions, height: 300 }
-        });
+        // HTTP Requests
+        const httpRes=await fetch(`${API_URL}/api/http`); const http=await httpRes.json();
+        httpChart.data.datasets[0].data=[http.status200,http.status400,http.status500]; httpChart.update();
 
-        // Fetch and Update Data
-        async function fetchData() {
-            try {
-                // Fetch system status
-                const statusRes = await fetch(`${API_URL}/api/status`);
-                const status = await statusRes.json();
-                
-                updateMetric('cpuValue', status.cpu + '%', 'cpuProgress', status.cpu);
-                updateMetric('ramValue', status.ram + '%', 'ramProgress', status.ram);
-                updateMetric('diskValue', status.disk + '%', 'diskProgress', status.disk);
-                document.getElementById('uptimeValue').textContent = status.uptime;
-                document.getElementById('ramSubtitle').textContent = `${(status.ram * 16 / 100).toFixed(1)} GB / 16 GB`;
-                document.getElementById('diskSubtitle').textContent = `${(status.disk * 512 / 100).toFixed(0)} GB / 512 GB`;
+        // Connections & Processes
+        const connRes=await fetch(`${API_URL}/api/connections`); const conn=await connRes.json();
+        document.getElementById('connectionsValue').textContent=conn.active;
+        const processesTable=document.getElementById('processesTable');
+        processesTable.innerHTML=conn.processes.map(p=>`<tr>
+            <td>${p.name}</td><td>${p.pid}</td><td>${p.cpu.toFixed(1)}%</td><td>${p.mem.toFixed(1)}%</td>
+            <td><span class="status-indicator ${p.status==='running'?'status-success':'status-warning'}"></span>${p.status}</td>
+        </tr>`).join('');
 
-                // Fetch network data
-                const networkRes = await fetch(`${API_URL}/api/network`);
-                const network = await networkRes.json();
-                
-                const time = new Date().toLocaleTimeString();
-                if (networkChart.data.labels.length > 10) {
-                    networkChart.data.labels.shift();
-                    networkChart.data.datasets[0].data.shift();
-                    networkChart.data.datasets[1].data.shift();
-                }
-                networkChart.data.labels.push(time);
-                networkChart.data.datasets[0].data.push(network.upload);
-                networkChart.data.datasets[1].data.push(network.download);
-                networkChart.update();
+        // Logs
+        const logsRes=await fetch(`${API_URL}/api/logs`); const logs=await logsRes.json();
+        const logsContainer=document.getElementById('logsContainer');
+        logsContainer.innerHTML=logs.map(log=>`<div class="log-entry">${log}</div>`).join('');
+    }catch(err){console.error('Fetch error:',err);}
+}
 
-                // Fetch HTTP data
-                const httpRes = await fetch(`${API_URL}/api/http`);
-                const http = await httpRes.json();
-                httpChart.data.datasets[0].data = [http.status200, http.status400, http.status500];
-                httpChart.update();
+// --- Log Search ---
+document.getElementById('logSearch').addEventListener('input',e=>{
+    const search=e.target.value.toLowerCase();
+    document.querySelectorAll('.log-entry').forEach(entry=>{entry.style.display=entry.textContent.toLowerCase().includes(search)?'block':'none';});
+});
 
-                // Fetch connections
-                const connectionsRes = await fetch(`${API_URL}/api/connections`);
-                const connections = await connectionsRes.json();
-                document.getElementById('connectionsValue').textContent = connections.active;
-
-                // Update processes table
-                const processesTable = document.getElementById('processesTable');
-                processesTable.innerHTML = connections.processes.map(proc => `
-                    <tr>
-                        <td>${proc.name}</td>
-                        <td>${proc.pid}</td>
-                        <td>${proc.cpu}%</td>
-                        <td>${proc.ram}%</td>
-                        <td><span class="status-indicator ${proc.status === 'running' ? 'status-success' : 'status-warning'}"></span>${proc.status}</td>
-                    </tr>
-                `).join('');
-
-                // Fetch logs
-                const logsRes = await fetch(`${API_URL}/api/logs`);
-                const logs = await logsRes.json();
-                const logsContainer = document.getElementById('logsContainer');
-                logsContainer.innerHTML = logs.map(log => `
-                    <div class="log-entry">${log}</div>
-                `).join('');
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
-
-        function updateMetric(valueId, value, progressId, percent) {
-            const valueEl = document.getElementById(valueId);
-            const progressEl = document.getElementById(progressId);
-            
-            valueEl.textContent = value;
-            progressEl.style.width = percent + '%';
-            
-            // Update status indicator color
-            const card = valueEl.closest('.card');
-            const indicator = card.querySelector('.status-indicator');
-            if (percent < 60) {
-                indicator.className = 'status-indicator status-success';
-            } else if (percent < 80) {
-                indicator.className = 'status-indicator status-warning';
-            } else {
-                indicator.className = 'status-indicator status-danger';
-            }
-        }
-
-        // Log Search
-        document.getElementById('logSearch').addEventListener('input', (e) => {
-            const search = e.target.value.toLowerCase();
-            document.querySelectorAll('.log-entry').forEach(entry => {
-                const text = entry.textContent.toLowerCase();
-                entry.style.display = text.includes(search) ? 'block' : 'none';
-            });
-        });
-
-        // Initialize
-        createParticles();
-        fetchData();
-        setInterval(fetchData, 3000);
-    </script>
+// --- Initialize ---
+createParticles(); fetchData(); setInterval(fetchData,3000);
+</script>
 </body>
 </html>
