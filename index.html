@@ -3,66 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arnav’s Server Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<title>Arnav’s AI Server Nexus</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family:'Inter',sans-serif; background:#1E2A38; color:#fff; transition:0.5s; }
-  .sidebar { width:220px; background:#16222A; height:100vh; position:fixed; left:0; top:0; padding:1rem; }
-  .sidebar h2 { color:#4A90E2; margin-bottom:2rem; cursor:pointer; transition:0.5s; }
-  .sidebar a { display:block; color:#ccc; margin:0.5rem 0; text-decoration:none; }
-  .main { margin-left:240px; padding:2rem; }
-  .header { display:flex; justify-content:space-between; align-items:center; }
-  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:2rem; }
-  .card { background:#233046; padding:1rem; border-radius:8px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:0.3s; }
-  .card:hover { transform:translateY(-5px); }
-  .card h3 { margin-bottom:0.5rem; color:#4A90E2; }
-  canvas { background:#1E2A38; border-radius:8px; }
-  .footer { text-align:center; margin-top:2rem; color:#aaa; font-size:0.9rem; }
-  button { background:#4A90E2; border:none; padding:0.5rem 1rem; border-radius:5px; color:#fff; cursor:pointer; }
-  .logs-panel { margin-top:2rem; background:#233046; padding:1rem; border-radius:8px; max-height:200px; overflow-y:auto; }
-  .log-entry { padding:0.2rem; border-bottom:1px solid #1E2A38; }
-  .hidden { display:none; }
-  input { width:100%; padding:0.5rem; margin-bottom:0.5rem; border-radius:5px; border:none; }
+  /* Futura neon theme */
+  body { margin:0; font-family:'Roboto',sans-serif; background:#0d0d1a; color:#fff; transition:0.5s; }
+  .sidebar { position:fixed; top:0; left:0; width:250px; height:100%; background:#11112b; display:flex; flex-direction:column; padding:1rem; transition:0.3s; }
+  .sidebar h2 { font-family:'Orbitron',sans-serif; color:#00fff5; text-align:center; margin-bottom:2rem; cursor:pointer; }
+  .sidebar a { color:#fff; text-decoration:none; margin:0.5rem 0; padding:0.5rem; border-radius:5px; display:block; transition:0.3s; }
+  .sidebar a:hover { background:#00fff5; color:#000; }
+  .main { margin-left:270px; padding:2rem; transition:0.3s; }
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
+  .header h1 { font-family:'Orbitron',sans-serif; color:#00fff5; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; }
+  .card { background:#11112b; border-radius:10px; padding:1rem; box-shadow:0 0 20px #00fff5; transition:0.3s; }
+  .card h3 { margin-bottom:0.5rem; font-family:'Orbitron',sans-serif; color:#00fff5; }
+  .chart-container { position:relative; height:300px; margin-top:1rem; }
+  .toggle-btn { background:#00fff5; color:#11112b; border:none; padding:0.5rem 1rem; border-radius:5px; cursor:pointer; }
+  .logs-panel { background:#11112b; max-height:200px; overflow-y:auto; padding:1rem; border-radius:10px; box-shadow:0 0 10px #00fff5; margin-top:1rem; }
+  .log-entry { padding:0.2rem; border-bottom:1px solid #222; }
+  input { width:100%; padding:0.5rem; margin-bottom:0.5rem; border-radius:5px; border:none; background:#222; color:#fff; }
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <h2 id="logo">Arnxv</h2>
+  <h2 id="logo">Arnav</h2>
   <a href="#">Overview</a>
   <a href="#">Metrics</a>
   <a href="#">Processes</a>
   <a href="#">Network</a>
+  <a href="#">Logs</a>
   <a href="#">Settings</a>
 </div>
 
 <div class="main">
   <div class="header">
-    <h1>Arnav’s Server Dashboard</h1>
-    <button onclick="toggleTheme()">Toggle Theme</button>
+    <h1>AI Server Nexus</h1>
+    <button class="toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
   </div>
 
-  <div class="cards">
+  <div class="card-grid">
     <div class="card"><h3>CPU Usage</h3><p id="cpu">--%</p></div>
     <div class="card"><h3>RAM Usage</h3><p id="ram">--%</p></div>
     <div class="card"><h3>Disk Usage</h3><p id="disk">--%</p></div>
     <div class="card"><h3>Uptime</h3><p id="uptime">-- hours</p></div>
     <div class="card"><h3>Active Connections</h3><p id="connections">--</p></div>
+    <div class="card"><h3>Minecraft Players</h3><p id="mcPlayers">--</p></div>
+    <div class="card"><h3>Bot Status</h3><p id="botStatus">--</p></div>
   </div>
 
-  <h2>CPU / RAM Over Time</h2>
-  <canvas id="lineChart" height="100"></canvas>
-
   <h2>Network Activity</h2>
-  <canvas id="networkChart" height="100"></canvas>
+  <div class="chart-container">
+    <canvas id="networkChart"></canvas>
+  </div>
 
   <h2>HTTP Requests</h2>
-  <canvas id="httpChart" height="100"></canvas>
+  <div class="chart-container">
+    <canvas id="httpChart"></canvas>
+  </div>
 
   <h2>Top Processes</h2>
-  <table id="processTable" border="1" cellpadding="5" style="width:100%; background:#233046; color:#fff; border-radius:5px;">
+  <table id="processTable" style="width:100%; background:#11112b; color:#00fff5; border-radius:5px;">
     <thead><tr><th>Name</th><th>CPU%</th><th>RAM%</th></tr></thead>
     <tbody></tbody>
   </table>
@@ -70,102 +73,93 @@
   <h2>Logs</h2>
   <input type="text" id="logFilter" placeholder="Search logs...">
   <div class="logs-panel" id="logsPanel"></div>
-
-  <div class="footer">© 2025 Arnav | Mega Dashboard</div>
 </div>
 
 <script>
-let lineChart, networkChart, httpChart;
-let cpuData=[], ramData=[], netUpload=[], netDownload=[], httpData200=[], httpData400=[], httpData500=[], labels=[];
-
-// Theme toggle + rainbow easter egg
-let rainbow = false;
-document.getElementById('logo').onclick = ()=>{ rainbow = !rainbow; toggleRainbow(); }
-function toggleRainbow(){
-  document.body.style.background = rainbow?'linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)':'#1E2A38';
-}
-
-// Theme toggle
+let dark = true;
 function toggleTheme(){
-  document.body.style.background = document.body.style.background==='#1E2A38'?'#f4f7fc':'#1E2A38';
-  document.body.style.color = document.body.style.color==='#fff'?'#333':'#fff';
+  dark = !dark;
+  document.body.style.background = dark?'#0d0d1a':'#f5f5f5';
+  document.body.style.color = dark?'#fff':'#000';
 }
 
-// Fetch all data
+let cpuData=[], ramData=[], labels=[], netUpload=[], netDownload=[], httpData200=[], httpData400=[], httpData500=[];
+let lineChart, networkChart, httpChart;
+
 async function fetchData(){
   const status = await fetch('https://dashboard-87s1.onrender.com/api/status').then(r=>r.json());
-  const processes = await fetch('https://dashboard-87s1.onrender.com/api/processes').then(r=>r.json());
   const network = await fetch('https://dashboard-87s1.onrender.com/api/network').then(r=>r.json());
   const http = await fetch('https://dashboard-87s1.onrender.com/api/http').then(r=>r.json());
+  const connections = await fetch('https://dashboard-87s1.onrender.com/api/connections').then(r=>r.json());
+  const custom = await fetch('https://dashboard-87s1.onrender.com/api/custom').then(r=>r.json());
   const logs = await fetch('https://dashboard-87s1.onrender.com/api/logs').then(r=>r.json());
 
-  // Update cards
   document.getElementById('cpu').textContent = status.cpu+'%';
   document.getElementById('ram').textContent = status.ram+'%';
   document.getElementById('disk').textContent = status.disk[0].used+'%';
   document.getElementById('uptime').textContent = status.uptime+' hours';
-  document.getElementById('connections').textContent = network[0].operstate==='up'?'Active':'Inactive';
+  document.getElementById('connections').textContent = connections.activeConnections;
+  document.getElementById('mcPlayers').textContent = custom.minecraftPlayers;
+  document.getElementById('botStatus').textContent = custom.botStatus;
 
   // Top processes
-  const tbody = document.getElementById('processTable').querySelector('tbody');
+  const tbody = document.querySelector('#processTable tbody');
   tbody.innerHTML='';
-  processes.forEach(p=>{
-    const row=`<tr><td>${p.name}</td><td>${p.cpu}</td><td>${p.mem}</td></tr>`;
-    tbody.innerHTML+=row;
+  connections.topProcesses.forEach(p=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${p.name}</td><td>${p.cpu}</td><td>${p.mem}</td>`;
+    tbody.appendChild(row);
   });
 
-  // Logs filter
+  // Logs
   const logsPanel = document.getElementById('logsPanel');
   logsPanel.innerHTML='';
   logs.forEach(log=>{
-    logsPanel.innerHTML+=`<div class="log-entry">${log.time} - ${log.message}</div>`;
+    const div=document.createElement('div');
+    div.className='log-entry';
+    div.textContent=`${log.time} - ${log.message}`;
+    logsPanel.appendChild(div);
   });
 
   // Charts
-  if(cpuData.length>10){ cpuData.shift(); ramData.shift(); netUpload.shift(); netDownload.shift(); labels.shift(); httpData200.shift(); httpData400.shift(); httpData500.shift();}
-  cpuData.push(parseFloat(status.cpu)); ramData.push(parseFloat(status.ram));
-  netUpload.push(network[0].tx_sec); netDownload.push(network[0].rx_sec);
-  httpData200.push(http['200']); httpData400.push(http['400']); httpData500.push(http['500']);
   labels.push(new Date().toLocaleTimeString());
+  cpuData.push(parseFloat(status.cpu));
+  ramData.push(parseFloat(status.ram));
+  netUpload.push(network[0].tx_sec);
+  netDownload.push(network[0].rx_sec);
+  httpData200.push(http['200']); httpData400.push(http['400']); httpData500.push(http['500']);
 
-  if(!lineChart){
-    const ctx = document.getElementById('lineChart').getContext('2d');
-    lineChart = new Chart(ctx,{type:'line',data:{labels,datasets:[
-      {label:'CPU %',data:cpuData,borderColor:'#4A90E2',fill:false},
-      {label:'RAM %',data:ramData,borderColor:'#2ECC71',fill:false}
-    ]},options:{responsive:true,animation:{duration:500}}});
-  } else { lineChart.update(); }
+  if(labels.length>10){ cpuData.shift(); ramData.shift(); netUpload.shift(); netDownload.shift(); labels.shift(); httpData200.shift(); httpData400.shift(); httpData500.shift(); }
 
   if(!networkChart){
     const ctx = document.getElementById('networkChart').getContext('2d');
-    networkChart = new Chart(ctx,{type:'line',data:{labels,datasets:[
-      {label:'Upload KB/s',data:netUpload,borderColor:'#F39C12',fill:false},
-      {label:'Download KB/s',data:netDownload,borderColor:'#3498DB',fill:false}
-    ]},options:{responsive:true,animation:{duration:500}}});
-  } else { networkChart.update(); }
+    networkChart = new Chart(ctx,{
+      type:'line',
+      data:{labels,datasets:[
+        {label:'Upload KB/s', data:netUpload, borderColor:'#00fff5', fill:false},
+        {label:'Download KB/s', data:netDownload, borderColor:'#ff00ff', fill:false}
+      ]},
+      options:{responsive:true, animation:{duration:500}}
+    });
+  } else networkChart.update();
 
   if(!httpChart){
     const ctx = document.getElementById('httpChart').getContext('2d');
-    httpChart = new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[
-      {label:'200',data:httpData200,backgroundColor:'#2ECC71'},
-      {label:'400',data:httpData400,backgroundColor:'#F1C40F'},
-      {label:'500',data:httpData500,backgroundColor:'#E74C3C'}
-    ]},options:{responsive:true,animation:{duration:500},scales:{x:{stacked:true},y:{stacked:true}}}});
-  } else { httpChart.update(); }
-
-  // Alerts for CPU/RAM/Disk
-  ['cpu','ram','disk'].forEach(id=>{
-    const val = parseFloat(document.getElementById(id).textContent);
-    const card = document.getElementById(id).parentElement;
-    if(val<50) card.style.background='#233046';
-    else if(val<80) card.style.background='#F1C40F';
-    else card.style.background='#E74C3C';
-  });
+    httpChart = new Chart(ctx,{
+      type:'bar',
+      data:{labels:['200','400','500'], datasets:[
+        {label:'Requests 200', data:httpData200, backgroundColor:'#00ff00'},
+        {label:'Requests 400', data:httpData400, backgroundColor:'#ffff00'},
+        {label:'Requests 500', data:httpData500, backgroundColor:'#ff0000'}
+      ]},
+      options:{responsive:true, animation:{duration:500}}
+    });
+  } else httpChart.update();
 }
 
-// Logs filter input
+// Logs filter
 document.getElementById('logFilter').addEventListener('input',(e)=>{
-  const filter = e.target.value.toLowerCase();
+  const filter=e.target.value.toLowerCase();
   document.querySelectorAll('.log-entry').forEach(log=>{
     log.style.display=log.textContent.toLowerCase().includes(filter)?'block':'none';
   });
